@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="fs_directory_view_search" model="ir.ui.view">
+        <field name="name">fs.directory.view.search</field>
+        <field name="model">fs.directory</field>
+        <field name="arch" type="xml">
+            <search string="Search Opportunities">
+                <field name="name"/>
+                <field name="number"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="fs_directory_view_form" model="ir.ui.view">
+        <field name="name">fs.directory.form</field>
+        <field name="model">fs.directory</field>
+        <field name="arch" type="xml">
+            <form string="Directory">
+                <sheet>
+                    
+                    <!-- <div class="oe_title">
+                        <div class="oe_edit_only">
+                            <label for="name"/>
+                        </div>
+                        <h1 class="mb32">
+                            <field name="name" class="mb16"/>
+                        </h1>
+                        <field name="active" invisible="1"/>
+                    </div> -->
+                     <group>
+                            <group>
+                                <!-- Preload all the partner's information -->
+                                <field name="name"/>
+                                <field name="cidr"/>
+                                <field name="regname"/>
+                                <field name="password"/>
+                                <field name="number"/>
+                                <field name="fs_users_id"/>
+                                <field name="domain_id"/>
+                                <field name="context_id"/>
+                                <field name="is_transfer"/>
+                                <field name="transfer_number"/>
+                            </group>
+                        </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="fs_directory_view_tree" model="ir.ui.view">
+        <field name="name">fs.directory.tree</field>
+        <field name="model">fs.directory</field>
+        <field name="arch" type="xml">
+            <!-- <tree string="Channel" editable="bottom"> -->
+            <tree>
+                <field name="number"/>
+                <field name="name"/>
+                <field name="fs_users_id"/>
+                <field name="domain_id"/>
+                <field name="context_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Configuration/Lead & Opportunities/Lost Reasons Menu -->
+    <record id="fs_directory_action" model="ir.actions.act_window">
+        <field name="name">Директория пользователя</field>
+        <field name="res_model">fs.directory</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p>
+             СОздайте новую запись
+          </p>
+        </field>
+    </record>
+
+    <!-- <record id="menu_fs_directory" model="ir.ui.menu">
+        <field name="action" ref="fs_directory_action"/>
+    </record> -->
+
+   
+</odoo>

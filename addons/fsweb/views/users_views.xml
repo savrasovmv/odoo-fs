@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="fs_users_view_search" model="ir.ui.view">
+        <field name="name">fs.users.view.search</field>
+        <field name="model">fs.users</field>
+        <field name="arch" type="xml">
+            <search string="Поиск пользователя">
+                <field name="name"/>
+                <field name="ip_phone"/>
+                <field name="sAMAccountName"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="fs_users_view_form" model="ir.ui.view">
+        <field name="name">fs.users.form</field>
+        <field name="model">fs.users</field>
+        <field name="arch" type="xml">
+            <form string="Пользователь">
+                <header>
+                    <button name="action_update_from_ldap" type="object" string="Обновить из LDAP"/>
+                </header>
+                <sheet>
+                     <group>
+                            <group>
+                                <!-- Preload all the partner's information -->
+                                <field name="name"/>
+                                <field name="is_ldap"/>
+                                <field name="ip_phone"/>
+                                <field name="sAMAccountName"/>
+                                <field name="ou"/>
+                                <field name="department"/>
+                                <field name="title"/>
+                            </group>
+                        </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="fs_users_view_tree" model="ir.ui.view">
+        <field name="name">fs.users.tree</field>
+        <field name="model">fs.users</field>
+        <field name="arch" type="xml">
+            <!-- <tree string="Channel" editable="bottom"> -->
+            <tree>
+                <field name="name"/>
+                <field name="sAMAccountName"/>
+                <field name="ip_phone"/>
+                <field name="department"/>
+                <field name="title"/>
+                <field name="is_ldap"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Configuration/Lead & Opportunities/Lost Reasons Menu -->
+    <record id="fs_users_action" model="ir.actions.act_window">
+        <field name="name">Пользователи</field>
+        <field name="res_model">fs.users</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p>
+             Создайте новую запись
+          </p>
+        </field>
+    </record>
+
+    <!-- <record id="menu_fs_users" model="ir.ui.menu">
+        <field name="action" ref="fs_users_action"/>
+    </record> -->
+
+   
+</odoo>

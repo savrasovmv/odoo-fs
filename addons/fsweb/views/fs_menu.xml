@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<odoo>
+
+     <menuitem id="menu_fs_root" name="FreeSWITCH">
+
+        <menuitem id="fs_directory_first_level_menu" name="Пользователи">
+            <menuitem id="fs_users_menu_action" action="fs_users_action"/>
+            <menuitem id="fs_directory_menu_action" action="fs_directory_action"/>
+        </menuitem>
+        <menuitem id="fs_settings_first_level_menu" name="Настройки">
+            <menuitem id="fs_domain_menu_action" action="fs_domain_action"/>
+            <menuitem id="fs_context_menu_action" action="fs_context_action"/>
+        </menuitem>
+
+    </menuitem>
+
+</odoo>
