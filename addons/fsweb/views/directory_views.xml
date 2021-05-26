@@ -18,6 +18,10 @@
         <field name="model">fs.directory</field>
         <field name="arch" type="xml">
             <form string="Directory">
+                <header>
+                    <button name="action_update_account" type="object" string="Обновить FS"/>
+                    <button name="action_registration_kerio" type="object" string="Зарег. в kerio"/>
+                </header>
                 <sheet>
                     
                     <!-- <div class="oe_title">
@@ -64,11 +68,42 @@
         </field>
     </record>
 
+
+    <record id="fs_directory_kanban_view" model="ir.ui.view">
+        <field name="name">fs.directory.view</field>
+        <field name="model">fs.directory</field>
+        <field name="arch" type="xml">
+            <kanban class="oe_background_grey o_kanban_dashboard o_salesteam_kanban o_project_kanban " create="0">
+                <field name="regname"/>
+                <field name="name"/>
+                <button type = "object" name = "action_update_all" class = "btn btn-primary btn-sm">
+
+                        <span> Новый </span>
+
+                    </button>
+                <templates>
+                    <span t-name="kanban-box"> <!-- Use <t> tag instead of <span> for color change -->
+                        <div class="o_project_kanban_manage">
+                            <a class="o_kanban_manage_toggle_button" href="#">More
+                                <i class="fa fa-caret-down"/>
+                            </a>
+                        </div>
+                    </span>
+                    <button type = "object" name = "action_update_all" class = "btn btn-primary btn-sm">
+
+                        <span> Новый </span>
+
+                    </button>
+                </templates>
+            </kanban>
+        </field>
+        </record>
+
     <!-- Configuration/Lead & Opportunities/Lost Reasons Menu -->
     <record id="fs_directory_action" model="ir.actions.act_window">
         <field name="name">Директория пользователя</field>
         <field name="res_model">fs.directory</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,kanban</field>
         <field name="help" type="html">
           <p>
              СОздайте новую запись
