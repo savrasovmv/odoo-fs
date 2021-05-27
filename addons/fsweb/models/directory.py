@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 import requests
 
@@ -20,25 +20,52 @@ class Directory(models.Model):
     _description = "Directory FS"
     _order = "number"
 
-    name = fields.Char(u'ФИО', required=True)
+    name = fields.Char(u'ФИО')
     cidr = fields.Char(u'cidr')
     regname = fields.Char(u'Рег. имя', required=True)
     password = fields.Char(u'Пароль', required=True)
     number = fields.Integer(u'Номер', required=True)
     active = fields.Boolean('Active', default=True)
-    fs_users_id = fields.Many2one("fs.users", string="Пользователь")
-    domain_id = fields.Many2one("fs.domain", string="Домен")
-    context_id = fields.Many2one("fs.context", string="Контекст")
-    is_transfer = fields.Boolean('Переадресовывать?', default=True)
-    transfer_number = fields.Integer(u'Номер переадресации', required=True)
-    kerio_number_guid = fields.Integer(u'Id kerio номера', help=u'Идентификатор записи добавочного номера')
-    kerio_reg_guid = fields.Integer(u'Id kerio регистрации', help=u'Идентификатор записи регистрации')
-
+    fs_users_id = fields.Many2one("fs.users", string="Пользователь", required=True)
+    domain_id = fields.Many2one("fs.domain", string="Домен", required=True, default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param('domain_id')))
+    context_id = fields.Many2one("fs.context", string="Контекст", required=True, default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param('context_id')))
+    is_transfer = fields.Boolean('Переадресовывать?', default=False)
+    transfer_number = fields.Integer(u'Номер переадресации')
+    is_kerio = fields.Boolean('Зарегестрирован в kerio', default=False, readonly=True)
+    kerio_group_guid = fields.Char(u'Id kerio номера', help=u'Идентификатор записи добавочного номера', readonly=True)
+    kerio_line_guid = fields.Char(u'Id kerio регистрации', help=u'Идентификатор записи регистрации', readonly=True)
+    is_rocketchat = fields.Boolean(string='Зарегистрирован в RocketChat', default=False, readonly=True)
+    rc_user_id = fields.Char(string='Id пользователя RocketChat', readonly=True)
     # sequence = fields.Integer('Sequence', default=10)
 
     # _sql_constraints = [
     #     ('check_number_of_months', 'CHECK(number_of_months >= 0)', 'The number of month can\'t be negative.'),
     # ]
+    # @api.model
+    # def create(self, vals):
+    #     # Do some business logic, modify vals...
+    #     ...
+    #     # Then call super to execute the parent method
+    #     return super().create(vals)
+
+
+    @api.onchange("fs_users_id")
+    def _onchange_from_users(self):
+        for record in self:
+            record.name = record.fs_users_id.name
+            record.regname = str(record.fs_users_id.ip_phone) + 'rc'
+            record.number = record.fs_users_id.ip_phone
+
+    # @api.depends("fs_users_id")
+    # def _compute_from_users(self):
+    #     for record in self:
+    #         # record.name = record.fs_users_id.name
+    #         record.regname = str(record.fs_users_id.ip_phone) + 'rc'
+    #         record.number = record.fs_users_id.ip_phone
+    # def _inverse_number(self):
+    #     for record in self:
+    #         record.cidr = record.name
+
 
     def action_update_all(self):
         print("++++++++++++++++++++++++++++++")

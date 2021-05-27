@@ -27,38 +27,38 @@ class FsUsers(models.Model):
 
     def action_update_from_ldap(self):
         #Подключение к серверу AD
-        # ldap_server = Server(host=LDAP_HOST, port=LDAP_PORT, use_ssl=True, get_info='ALL')
-        # c = Connection(ldap_server, user=LDAP_USER, password=LDAP_PASS)
-        # c.bind()
-        # filter = '(&(objectClass=person)(sAMAccountName=' + self.sAMAccountName + '))'
-        # res = c.search(search_base='OU=UsersCorporate,DC=tmenergo,DC=ru',
-        #             search_filter=filter,
-        #             search_scope=SUBTREE,
-        #             attributes=['cn','department', 'title', 'ou', 'ipPhone', 'distinguishedName' ])
-        # print("------------------------------------")
-        # print(res)
-        # if res:
-        #     emp = c.response[0]
-        #     print(emp)
-        #     atr = emp['attributes']
-        #     dn = emp['dn']
-        #     print(atr)
-        #     department = atr['department']
-        #     self.name = atr['cn']
-        #     self.department = atr['department']
-        #     self.title = atr['title']
-        #     self.ou = dn.split(',OU=')[1]
-        #     self.ip_phone = atr['ipPhone']
+        ldap_server = Server(host=LDAP_HOST, port=LDAP_PORT, use_ssl=True, get_info='ALL')
+        c = Connection(ldap_server, user=LDAP_USER, password=LDAP_PASS)
+        c.bind()
+        filter = '(&(objectClass=person)(sAMAccountName=' + self.sAMAccountName + '))'
+        res = c.search(search_base='OU=UsersCorporate,DC=tmenergo,DC=ru',
+                    search_filter=filter,
+                    search_scope=SUBTREE,
+                    attributes=['cn','department', 'title', 'ou', 'ipPhone', 'distinguishedName' ])
+        print("------------------------------------")
+        print(res)
+        if res:
+            emp = c.response[0]
+            print(emp)
+            atr = emp['attributes']
+            dn = emp['dn']
+            print(atr)
+            department = atr['department']
+            self.name = atr['cn']
+            self.department = atr['department']
+            self.title = atr['title']
+            self.ou = dn.split(',OU=')[1]
+            self.ip_phone = atr['ipPhone']
 
-        f= open("/home/user/temp/%src.xml" % self.ip_phone, "w+")
-        f.write("""
-                <gateway name="110p2">
-                    <param name="username" value="110p2"/>
-                    <param name="password" value="Gfhjkm12@"/>
-                    <param name="proxy" value="192.168.1.11"/>
-                    <param name="register" value="false"/>
-                </gateway>
+        # f= open("/home/user/temp/%src.xml" % self.ip_phone, "w+")
+        # f.write("""
+        #         <gateway name="110p2">
+        #             <param name="username" value="110p2"/>
+        #             <param name="password" value="Gfhjkm12@"/>
+        #             <param name="proxy" value="192.168.1.11"/>
+        #             <param name="register" value="false"/>
+        #         </gateway>
         
-        """)
-        f.close() 
+        # """)
+        # f.close() 
         return True

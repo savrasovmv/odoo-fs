@@ -46,6 +46,11 @@
                                 <field name="context_id"/>
                                 <field name="is_transfer"/>
                                 <field name="transfer_number"/>
+                                <field name="is_kerio"/>
+                                <field name="kerio_group_guid"/>
+                                <field name="kerio_line_guid"/>
+                                <field name="is_rocketchat"/>
+                                <field name="rc_user_id"/>
                             </group>
                         </group>
                 </sheet>

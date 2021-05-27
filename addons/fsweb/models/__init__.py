@@ -4,3 +4,4 @@ from . import directory
 from . import users
 from . import domain
 from . import context
+from . import settings

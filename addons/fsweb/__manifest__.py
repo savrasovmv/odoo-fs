@@ -21,6 +21,7 @@
         'views/context_views.xml',
         'views/directory_views.xml',
         'views/users_views.xml',
+        'views/settings_view.xml',
         'views/fs_menu.xml',
         
 

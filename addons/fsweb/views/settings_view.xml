@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>   
+    <record id="fs_res_config_settings_view_form_inherit" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.fs</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="25" />
+        <field name="inherit_id" ref="base.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="FSWeb" string="FSWeb" data-key="FSWeb" groups="base.group_user">
+
+                    <h2>Настроки Rocket Chat</h2>
+                    <div class="row mt16 o_settings_container">
+                        
+                        <div class="col-lg-12 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="rc_url"/>
+                                <div class="text-muted">
+                                    URL адрес сервера Rocket Chat
+                                </div>
+                                <field name="rc_url"/>
+
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="rc_user"/>
+                                <div class="text-muted">
+                                    Имя пользователя
+                                </div>
+                                <field name="rc_user"/>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="rc_password"/>
+                                <div class="text-muted">
+                                    Пароль
+                                </div>
+                                <field name="rc_password"/>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="rc_prefix"/>
+                                <div class="text-muted">
+                                    Префикс sip номера
+                                </div>
+                                <field name="rc_prefix"/>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <h2>Настроки Kerio</h2>
+                    <div class="row mt16 o_settings_container">
+                        
+                        <div class="col-lg-12 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="kerio_url"/>
+                                <div class="text-muted">
+                                    URL адрес сервера API (https://serverName:4021/admin/api/jsonrpc/)
+                                </div>
+                                <field name="kerio_url"/>
+
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="kerio_user"/>
+                                <div class="text-muted">
+                                    Имя пользователя
+                                </div>
+                                <field name="kerio_user"/>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="kerio_password"/>
+                                <div class="text-muted">
+                                    Пароль
+                                </div>
+                                <field name="kerio_password"/>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <h2>Значения по умолчанию</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="domain_id"/>
+                                <div class="text-muted">
+                                    Домен sip сервера
+                                </div>
+                                <field name="domain_id"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="context_id"/>
+                                <div class="text-muted">
+                                    Контекст пользователя
+                                </div>
+                                <field name="context_id"/>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </xpath>
+        </field>
+    </record>
+   
+    <record id="fs_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="fs_res_config_settings_view_form_inherit"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'fsweb'}</field>
+    </record>
+
+    <!-- <record id="fs_settings_menu" model="ir.ui.menu">
+        <field name="action" ref="fsweb.fs_settings_action"/>
+    </record> -->
+
+</odoo>

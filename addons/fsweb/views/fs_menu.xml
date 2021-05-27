@@ -10,6 +10,7 @@
         <menuitem id="fs_settings_first_level_menu" name="Настройки">
             <menuitem id="fs_domain_menu_action" action="fs_domain_action"/>
             <menuitem id="fs_context_menu_action" action="fs_context_action"/>
+            <menuitem id="fs_settings_menu_action" action="fs_settings_action"/>
         </menuitem>
 
     </menuitem>
