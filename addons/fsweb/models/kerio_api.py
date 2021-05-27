@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 import json
-import pprint
+#import pprint
 
 class KerioAPI(object):
     """Класс для работы с API Kerio Operator"""
@@ -84,7 +84,7 @@ class KerioAPI(object):
 
         response = requests.post(self.url, headers=self.headers, data=json.dumps(data), cookies=self.cookies)
         res = json.loads(response.content)
-        pprint.pprint(res)
+        #pprint.pprint(res)
         if "error" in res:
             print("Ошибка: ", res['error'])
             return {"result": "error", "error": res['error']}
@@ -96,9 +96,8 @@ class KerioAPI(object):
                 for line in ext_list:
                     if "telNum" in line and "guid" in line and "USERNAME" in line:
                         
-                        
                         telNum = line["telNum"]
-                        print("Добавочный номер найден", telNum)
+                        
                         if  "parentId" in line and "sipUsername" in line:
                             sipUsername = line["sipUsername"]
                             if sipUsername == sip_username and telNum == number:
@@ -113,6 +112,7 @@ class KerioAPI(object):
                                 return sip_user
 
                         if telNum == number and not "sipUsername" in line:
+                            print("Добавочный номер найден", telNum)
                             sip_user = {
                                 'number': line["telNum"],
                                 'group_id': line["guid"],
@@ -234,6 +234,7 @@ class KerioAPI(object):
 
         # Если регистрация существует
         if "sip_username" in line:
+            print("Регистрация найдена")
             # Добавляеи пароль и возвращаем данные
             password = self.get_password(line["line_id"])
             line["password"] = password
@@ -241,7 +242,15 @@ class KerioAPI(object):
         elif "group_id" in line:
             # т.е добавочный номер (группа) найден, но регистрация нет, тогда создаем новую регистрацию
             new_line = self.create_line_by_username(line["group_id"], sip_username)
-            return new_line
+            if "error" in new_line:
+                return new_line
+            print("Регистрация создана, Делаем поиск по новой")
+            # Ищим по новой созданную сроку, что бы получить доп свойства
+            check_line = self.search_sip_username(number, sip_username)
+            if check_line and not "error" in check_line:
+                # Добавляем пароль
+                check_line["password"] = new_line["password"]
+                return check_line
 
 
 
@@ -254,5 +263,5 @@ if __name__ == "__main__":
 
     kerio = KerioAPI(url, username, password)
     if kerio.session:
-        sip_user = kerio.update_or_create_line('104', '104rc5555')
+        sip_user = kerio.update_or_create_line('104', '104rc555')
         print(sip_user)
