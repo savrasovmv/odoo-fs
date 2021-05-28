@@ -19,8 +19,8 @@
         <field name="arch" type="xml">
             <form string="Directory">
                 <header>
-                    <button name="action_update_account" type="object" string="Обновить FS"/>
-                    <button name="action_registration_kerio" type="object" string="Зарег. в kerio"/>
+                    <button name="action_update_fs" type="object" string="Обновить FS"/>
+                    <button name="action_registration_kerio" type="object" string="Зарег. в kerio" confirm="Будет создана регистрация в Kerio Operator. Если запись уже существует то обновятся текущие данные. Продолжить?"/>
                 </header>
                 <sheet>
                     
@@ -37,6 +37,7 @@
                             <group>
                                 <!-- Preload all the partner's information -->
                                 <field name="name"/>
+                                <field name="username"/>
                                 <field name="cidr"/>
                                 <field name="regname"/>
                                 <field name="password"/>
@@ -66,7 +67,7 @@
             <tree>
                 <field name="number"/>
                 <field name="name"/>
-                <field name="fs_users_id"/>
+                <field name="username"/>
                 <field name="domain_id"/>
                 <field name="context_id"/>
             </tree>

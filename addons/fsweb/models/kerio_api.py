@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 import json
-#import pprint
+# import pprint
 
 class KerioAPI(object):
     """Класс для работы с API Kerio Operator"""
@@ -66,6 +66,7 @@ class KerioAPI(object):
         """Поиск данных number - тел.номер, sip_username - регистрация"""
         if not self.session: return {"result": "error", "error" : "Not connect"}
 
+        print("search ", number, sip_username)
         data = {
             "jsonrpc": "2.0",
             'id':  "1",
@@ -84,7 +85,7 @@ class KerioAPI(object):
 
         response = requests.post(self.url, headers=self.headers, data=json.dumps(data), cookies=self.cookies)
         res = json.loads(response.content)
-        #pprint.pprint(res)
+        # pprint.pprint(res)
         if "error" in res:
             print("Ошибка: ", res['error'])
             return {"result": "error", "error": res['error']}
@@ -107,7 +108,7 @@ class KerioAPI(object):
                                     'number': line["telNum"],
                                     'line_id': line["guid"],
                                     'group_id': line["parentId"],
-                                    'username': line["USERNAME"],
+                                    'username': line["USERNAME"].lower(),
                                 }
                                 return sip_user
 
@@ -116,12 +117,59 @@ class KerioAPI(object):
                             sip_user = {
                                 'number': line["telNum"],
                                 'group_id': line["guid"],
-                                'USERNAME': line["USERNAME"],
+                                'username': line["USERNAME"].lower(),
                             }
+                if sip_user:
+                    return sip_user
 
-                return sip_user
+        return {"result": "error", "error": "Добавочный номер %s не найден" % number }
+    
+    def search_number(self, number):
+        """Поиск данных number - тел.номер"""
+        if not self.session: return {"result": "error", "error" : "Not connect"}
 
-        return False
+        print("search_number ", number)
+        data = {
+            "jsonrpc": "2.0",
+            'id':  "1",
+            'method': 'Extensions.get',
+            'params': {
+                "query": {
+                    "combining": "And",
+                    "conditions": [{
+                        "comparator": "=",
+                        "fieldName": "SEARCH",
+                        "value": number
+                    }]
+                }
+            }
+        }
+
+        response = requests.post(self.url, headers=self.headers, data=json.dumps(data), cookies=self.cookies)
+        res = json.loads(response.content)
+        # pprint.pprint(res)
+        if "error" in res:
+            print("Ошибка: ", res['error'])
+            return {"result": "error", "error": res['error']}
+
+        if "result" in res:
+            if "sipExtensionList" in res["result"]:
+                ext_list = res["result"]["sipExtensionList"]
+                sip_user = False
+                for line in ext_list:
+                    if "telNum" in line and "guid" in line and "USERNAME" in line:
+                        
+                        telNum = line["telNum"]
+                        if telNum == number and not "sipUsername" in line:
+                            print("Добавочный номер найден", telNum)
+                            sip_user = {
+                                'number': line["telNum"],
+                                'group_id': line["guid"],
+                                'username': line["USERNAME"].lower(),
+                            }
+                            return sip_user
+
+        return {"result": "error", "error": "Добавочный номер %s не найден" % number }
 
 
     def set_name_line(self, line_id, sip_username):
@@ -185,7 +233,7 @@ class KerioAPI(object):
           'params': {"guid": group_id, "detail": {}}
         }
 
-        response = requests.post(url, headers=self.headers, data=json.dumps(data), cookies=self.cookies)
+        response = requests.post(self.url, headers=self.headers, data=json.dumps(data), cookies=self.cookies)
         res = json.loads(response.content)
         print("create_line", res)
         if "result" in res:
@@ -224,44 +272,51 @@ class KerioAPI(object):
 
 
 
-    def update_or_create_line(self, number, sip_username):
+    def update_or_create_line(self, number, sip_username, username):
         """Создает или обновляет регистрацию для добавочного номер
             number - тел.номер, sip_username - регистрация
         """
         line = self.search_sip_username(number, sip_username)
-        if not line or "error" in line:
-            return False
-
-        # Если регистрация существует
-        if "sip_username" in line:
-            print("Регистрация найдена")
-            # Добавляеи пароль и возвращаем данные
-            password = self.get_password(line["line_id"])
-            line["password"] = password
+        print("line", line)
+        if not line:
+            return {"error": "Ошибка в поиске добавочного номера"}
+        if "error" in line:
             return line
-        elif "group_id" in line:
-            # т.е добавочный номер (группа) найден, но регистрация нет, тогда создаем новую регистрацию
-            new_line = self.create_line_by_username(line["group_id"], sip_username)
-            if "error" in new_line:
-                return new_line
-            print("Регистрация создана, Делаем поиск по новой")
-            # Ищим по новой созданную сроку, что бы получить доп свойства
-            check_line = self.search_sip_username(number, sip_username)
-            if check_line and not "error" in check_line:
-                # Добавляем пароль
-                check_line["password"] = new_line["password"]
-                return check_line
+        if "username" in line:
+            # Проверка имени пользователя
+            if line["username"] == username:
+
+                # Если регистрация существует
+                if "sip_username" in line:
+                    print("Регистрация найдена")
+                    # Добавляеи пароль и возвращаем данные
+                    password = self.get_password(line["line_id"])
+                    line["password"] = password
+                    return line
+                elif "group_id" in line:
+                    # т.е добавочный номер (группа) найден, но регистрация нет, тогда создаем новую регистрацию
+                    new_line = self.create_line_by_username(line["group_id"], sip_username)
+                    if "error" in new_line:
+                        return new_line
+                    print("Регистрация создана, Делаем поиск по новой")
+                    # Ищим по новой созданную сроку, что бы получить доп свойства
+                    check_line = self.search_sip_username(number, sip_username)
+                    if check_line and not "error" in check_line:
+                        # Добавляем пароль
+                        check_line["password"] = new_line["password"]
+                        return check_line
+            else:
+                return {"error": "Имена пользователей не совпадают. Для тел %s установлен %s" % (number, line["username"])}
 
 
 
 
+# if __name__ == "__main__":
+#     url = "https://sip3.fineapple.xyz:4021/admin/api/jsonrpc/";
+#     username = "admin00"
+#     password = "1qaz2WSX"
 
-if __name__ == "__main__":
-    url = "https://sip3.fineapple.xyz:4021/admin/api/jsonrpc/";
-    username = "admin00"
-    password = "1qaz2WSX"
-
-    kerio = KerioAPI(url, username, password)
-    if kerio.session:
-        sip_user = kerio.update_or_create_line('104', '104rc555')
-        print(sip_user)
+#     kerio = KerioAPI(url, username, password)
+#     if kerio.session:
+#         sip_user = kerio.update_or_create_line('104', '104rc555')
+#         print(sip_user)

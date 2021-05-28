@@ -20,7 +20,7 @@ class FsUsers(models.Model):
     active = fields.Boolean('Active', default=True)
     is_ldap = fields.Boolean('LDAP?', default=True)
     ip_phone = fields.Integer(u'Вн. номер')
-    sAMAccountName = fields.Char(u'sAMAccountName')
+    username = fields.Char(u'sAMAccountName')
     ou = fields.Char(u'Орг.единица (OU)')
     department = fields.Char(u'Департамент')
     title = fields.Char(u'Должность')
@@ -30,7 +30,7 @@ class FsUsers(models.Model):
         ldap_server = Server(host=LDAP_HOST, port=LDAP_PORT, use_ssl=True, get_info='ALL')
         c = Connection(ldap_server, user=LDAP_USER, password=LDAP_PASS)
         c.bind()
-        filter = '(&(objectClass=person)(sAMAccountName=' + self.sAMAccountName + '))'
+        filter = '(&(objectClass=person)(sAMAccountName=' + self.username + '))'
         res = c.search(search_base='OU=UsersCorporate,DC=tmenergo,DC=ru',
                     search_filter=filter,
                     search_scope=SUBTREE,
