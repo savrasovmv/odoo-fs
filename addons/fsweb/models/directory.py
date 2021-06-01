@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, http
+from odoo.http import request
 
 import requests
 
@@ -150,3 +151,52 @@ class Directory(models.Model):
             },
         }
         return notification
+
+
+class DirectoryController(http.Controller):
+    @http.route('/apidirectory', auth='public')
+    def handler(self):
+        dir_rec = request.env['fs.directory'].sudo().search([])
+        print("+++++++dir_rec",dir_rec)
+        spisok = []
+        for rec in dir_rec:
+            print("++++rec", rec)
+            vals = {
+                'id': rec.id,
+                'regname': rec.regname,
+                'password': rec.password,
+                'username': rec.username,
+            }
+            print("+++val", vals)
+            spisok.append(vals)
+        print("++++spisok", spisok)
+
+        data = {'status': 200, 'response': spisok, 'message': 'spisok returned'}
+        print("++++data", data)
+
+        return json.dumps(data)
+
+class DirectoryController(http.Controller):
+    @http.route('/api_get_directory/<username>', type='http', auth='user')
+    def api_get_directory(self, username=False):
+        if not username:
+            data = {'status': 200, 'response': [], 'message': 'Not user name'}
+            return json.dumps(data)
+        else:
+            domain = [('username', '=', username), ('active', '=', True)]
+
+
+        dir_rec = request.env['fs.directory'].sudo().search(domain, limit=1)
+        if len(dir_rec) > 0:
+            print("+++++++dir_rec",dir_rec)
+            vals = {
+                'id': dir_rec.id,
+                'regname': dir_rec.regname,
+                'password': dir_rec.password,
+                'username': dir_rec.username,
+            }
+
+        data = {'status': 200, 'response': vals, 'message': 'vals returned'}
+        print("++++vals", vals)
+
+        return json.dumps(data)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
-import json
-# import pprint
+import json 
+import pprint
 
 class KerioAPI(object):
     """Класс для работы с API Kerio Operator"""
@@ -85,7 +85,7 @@ class KerioAPI(object):
 
         response = requests.post(self.url, headers=self.headers, data=json.dumps(data), cookies=self.cookies)
         res = json.loads(response.content)
-        # pprint.pprint(res)
+        pprint.pprint(res)
         if "error" in res:
             print("Ошибка: ", res['error'])
             return {"result": "error", "error": res['error']}
@@ -94,6 +94,7 @@ class KerioAPI(object):
             if "sipExtensionList" in res["result"]:
                 ext_list = res["result"]["sipExtensionList"]
                 sip_user = False
+                
                 for line in ext_list:
                     if "telNum" in line and "guid" in line and "USERNAME" in line:
                         
@@ -112,13 +113,24 @@ class KerioAPI(object):
                                 }
                                 return sip_user
 
-                        if telNum == number and not "sipUsername" in line:
-                            print("Добавочный номер найден", telNum)
-                            sip_user = {
-                                'number': line["telNum"],
-                                'group_id': line["guid"],
-                                'username': line["USERNAME"].lower(),
-                            }
+                        
+                        if telNum == number:
+                            sipUsername = False
+                            if "sipUsername" in line:
+                                sipUsername = line["sipUsername"] 
+                            # Если нет регистраций, т.е только одна регистрация например 110 и все
+                            if not sipUsername or (sipUsername == telNum and "parentId" in line):
+                                if "parentId" in line:
+                                    group_id = line["parentId"]
+                                else:
+                                    group_id = line["guid"]
+
+                                print("Добавочный номер найден", telNum)
+                                sip_user = {
+                                    'number': line["telNum"],
+                                    'group_id': group_id,
+                                    'username': line["USERNAME"].lower(),
+                                }
                 if sip_user:
                     return sip_user
 
@@ -254,7 +266,9 @@ class KerioAPI(object):
             group_id - guid добавочного номра (например номер 100)
             sip_username - имя регистрации
         """
+        print('create_line_by_username')
         new_line = self.create_line(group_id)
+        print('new_line', new_line)
         if new_line:
             res = self.set_name_line(new_line["line_id"], sip_username)
             if res:
