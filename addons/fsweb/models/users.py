@@ -19,7 +19,7 @@ class FsUsers(models.Model):
     name = fields.Char(u'ФИО', required=True, translate=True)
     active = fields.Boolean('Active', default=True)
     is_ldap = fields.Boolean('LDAP?', default=True)
-    ip_phone = fields.Integer(u'Вн. номер')
+    ip_phone = fields.Char(u'Вн. номер')
     username = fields.Char(u'sAMAccountName')
     ou = fields.Char(u'Орг.единица (OU)')
     department = fields.Char(u'Департамент')

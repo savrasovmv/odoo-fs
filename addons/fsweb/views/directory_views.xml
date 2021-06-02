@@ -21,6 +21,7 @@
                 <header>
                     <button name="action_update_fs" type="object" string="Обновить FS"/>
                     <button name="action_registration_kerio" type="object" string="Зарег. в kerio" confirm="Будет создана регистрация в Kerio Operator. Если запись уже существует то обновятся текущие данные. Продолжить?"/>
+                    <button name="action_set_transfer_kerio" type="object" string="action_set_transfer_kerio" confirm="Будет обновлена запись переадресации звонков>. Продолжить?"/>
                 </header>
                 <sheet>
                     

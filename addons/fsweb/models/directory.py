@@ -28,13 +28,13 @@ class Directory(models.Model):
     cidr = fields.Char(u'cidr')
     regname = fields.Char(u'Рег. имя')
     password = fields.Char(u'Пароль')
-    number = fields.Integer(u'Номер', required=True)
+    number = fields.Char(u'Номер', required=True)
     active = fields.Boolean('Active', default=True)
     fs_users_id = fields.Many2one("fs.users", string="Пользователь", required=True)
     domain_id = fields.Many2one("fs.domain", string="Домен", required=True, default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param('domain_id')))
     context_id = fields.Many2one("fs.context", string="Контекст", required=True, default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param('context_id')))
     is_transfer = fields.Boolean('Переадресовывать?', default=False)
-    transfer_number = fields.Integer(u'Номер переадресации')
+    transfer_number = fields.Char(u'Номер переадресации')
     is_kerio = fields.Boolean('Зарегестрирован в kerio', default=False, readonly=True)
     kerio_group_guid = fields.Char(u'Id kerio номера', help=u'Идентификатор записи добавочного номера', readonly=True)
     kerio_line_guid = fields.Char(u'Id kerio регистрации', help=u'Идентификатор записи регистрации', readonly=True)
@@ -71,9 +71,10 @@ class Directory(models.Model):
     #     for record in self:
     #         record.cidr = record.name
 
-
-    def action_update_all(self):
-        print("++++++++++++++++++++++++++++++")
+    @api.model
+    def action_update_all(self, *arg):
+        print("++++++++++++++++++++++++++++++ action_update_all ")
+        return True
 
     
     def action_update_fs(self):
@@ -97,7 +98,7 @@ class Directory(models.Model):
         fs = greenswitch.InboundESL(host='192.168.1.8', port=8021, password='ClueCon')
         fs.connect()
         # r = fs.send('api sofia status')
-        r = fs.send('api luarun /etc/freeswitch/scripts/gateway.lua')
+        r = fs.send('api sofia profile external rescan')
         print(r.data)
         return True
 
@@ -136,6 +137,61 @@ class Directory(models.Model):
                         return notification
                     if "error" in res:
                         error = res["error"]
+            else:
+                error = "Не возможно подключиться к Kerio Operator"
+        else:
+            error = "Не установлены обязательные параметры: username, regname, number, kerio_url, kerio_user, kerio_password"
+        notification = {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': ('Ошибка'),
+                'message': 'Запись не добавлена. %s' % error,
+                'type':'warning',  #types: success,warning,danger,info
+                'sticky': True,  #True/False will display for few seconds if false
+            },
+        }
+        return notification
+
+    def action_set_transfer_kerio(self):
+        if self.is_transfer and self.transfer_number == '':
+            notification = {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': ('Ошибка'),
+                    'message': 'Не установлен номер для переадресации',
+                    'type':'warning',  #types: success,warning,danger,info
+                    'sticky': True,  #True/False will display for few seconds if false
+                },
+            }
+            return notification
+
+        print("++++++++++++ action_set_transfer_kerio ++++++++++++++++++")
+        kerio_url = self.env['ir.config_parameter'].sudo().get_param('kerio_url')
+        kerio_user = self.env['ir.config_parameter'].sudo().get_param('kerio_user')
+        kerio_password = self.env['ir.config_parameter'].sudo().get_param('kerio_password')
+        print('kerio_user', kerio_user)
+        error = ""
+        if self.username and self.regname and self.number and kerio_url and kerio_user and kerio_password:
+
+            kerio = kerio_api.KerioAPI(kerio_url, kerio_user, kerio_password)
+            if kerio.session:
+                print("kerio.session", kerio.session)
+                res = kerio.update_transfer(str(self.number), self.regname, self.username, self.is_transfer, self.transfer_number)
+
+                notification = {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': ('Успех'),
+                        'message': 'Запись обновлена',
+                        'type':'success',  #types: success,warning,danger,info
+                        'sticky': False,  #True/False will display for few seconds if false
+                    },
+                }
+                return notification
+                
             else:
                 error = "Не возможно подключиться к Kerio Operator"
         else:

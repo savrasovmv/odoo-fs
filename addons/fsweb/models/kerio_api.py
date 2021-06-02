@@ -323,6 +323,16 @@ class KerioAPI(object):
                 return {"error": "Имена пользователей не совпадают. Для тел %s установлен %s" % (number, line["username"])}
 
 
+    def update_transfer(self, number, sip_username, username, is_transfer, transfer_number):
+        """Создает или обновляет регистрацию для добавочного номер
+            number - тел.номер, sip_username - регистрация
+        """
+
+        if is_transfer and transfer_number=='':
+            return {"error": "Не установлен номер переадресации"}
+
+        
+
 
 
 # if __name__ == "__main__":
