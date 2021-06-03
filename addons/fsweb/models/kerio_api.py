@@ -109,6 +109,7 @@ class KerioAPI(object):
                                     'number': line["telNum"],
                                     'line_id': line["guid"],
                                     'group_id': line["parentId"],
+                                    'user_id': line["userGuid"],
                                     'username': line["USERNAME"].lower(),
                                 }
                                 return sip_user
@@ -323,15 +324,49 @@ class KerioAPI(object):
                 return {"error": "Имена пользователей не совпадают. Для тел %s установлен %s" % (number, line["username"])}
 
 
-    def update_transfer(self, number, sip_username, username, is_transfer, transfer_number):
-        """Создает или обновляет регистрацию для добавочного номер
-            number - тел.номер, sip_username - регистрация
+    def update_transfer(self, user_id=0, group_id=0, is_transfer=False, number='', transfer_number=''):
+        """Устанавливает/удаляет номер для переадресации
         """
+        error = ''
+        if user_id == 0 or group_id == 0 or number == '' or (is_transfer == True and transfer_number == ''):
+            error += "Не хватает параметров. user_id=%s, group_id=%s, number=%s, is_transfer=%s, transfer_number=%s" % (user_id, group_id, number, is_transfer, transfer_number)
+            return {"error": error}
 
-        if is_transfer and transfer_number=='':
-            return {"error": "Не установлен номер переадресации"}
+        data = {
+            "jsonrpc": "2.0",
+            'id':  "1",
+            'method': 'Users.set',
+            'params': {
+                "detail": {
+                    "EXTENSIONS": [
+                        {
+                            "GUID": group_id,
+                            #"BUSY_ACTION": 1,
+                            "FIND_ME_LIST": [{"ENABLED": is_transfer, "NUMBER": transfer_number}],
+                            #"IS_PRIMARY": True,
+                            #"OBEY_RING_RULES": False,
+                            #"OCCUPIED_REJECT": False,
+                            "RING_EXTENSION": False if is_transfer else True,
+                            #"RING_EXTENSION_TIMEOUT": 15,
+                            "TEL_NUM": number,
+                            #"VOICEMAIL_FALLBACK": True,
+                            #"VOICEMAIL_FALLBACK_TIMEOUT": 15,
+                            #"WEBRTC_RING_GROUP": False
+                        }
+                    ] 
+                },
+                "guids": [user_id]
+            }
+        }
+        print("set_treansfer data", data)
+        print("set_treansfer data json", json.dumps(data))
+        response = requests.post(self.url, headers=self.headers, data=json.dumps(data), cookies=self.cookies)
+        res = json.loads(response.content)
+        print("set_treansfer res", res)
+        if "result" in res:
+            return True
 
-        
+        return {"error": res}
 
 
 

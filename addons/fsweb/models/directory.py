@@ -26,9 +26,9 @@ class Directory(models.Model):
     name = fields.Char(u'ФИО')
     username = fields.Char(string='Имя пользователя')
     cidr = fields.Char(u'cidr')
-    regname = fields.Char(u'Рег. имя')
-    password = fields.Char(u'Пароль')
-    number = fields.Char(u'Номер', required=True)
+    regname = fields.Char(u'Рег. имя sip')
+    password = fields.Char(u'Пароль sip')
+    number = fields.Char(u'Номер телефона', required=True)
     active = fields.Boolean('Active', default=True)
     fs_users_id = fields.Many2one("fs.users", string="Пользователь", required=True)
     domain_id = fields.Many2one("fs.domain", string="Домен", required=True, default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param('domain_id')))
@@ -36,6 +36,7 @@ class Directory(models.Model):
     is_transfer = fields.Boolean('Переадресовывать?', default=False)
     transfer_number = fields.Char(u'Номер переадресации')
     is_kerio = fields.Boolean('Зарегестрирован в kerio', default=False, readonly=True)
+    kerio_user_guid = fields.Char(u'Id kerio пользователя', help=u'Идентификатор записи пользователя', readonly=True)
     kerio_group_guid = fields.Char(u'Id kerio номера', help=u'Идентификатор записи добавочного номера', readonly=True)
     kerio_line_guid = fields.Char(u'Id kerio регистрации', help=u'Идентификатор записи регистрации', readonly=True)
     is_rocketchat = fields.Boolean(string='Зарегистрирован в RocketChat', default=False, readonly=True)
@@ -118,8 +119,9 @@ class Directory(models.Model):
                 res = kerio.update_or_create_line(str(self.number), self.regname, self.username)
                 print(res)
                 if res:
-                    if 'sip_username' in res and  'number' in res and  'line_id' in res and 'group_id' in res and 'username' in res and 'password' in res:
+                    if 'user_id' in res and 'sip_username' in res and  'number' in res and  'line_id' in res and 'group_id' in res and 'username' in res and 'password' in res:
                         self.is_kerio = True
+                        self.kerio_user_guid = res["user_id"]
                         self.kerio_group_guid = res["group_id"]
                         self.kerio_line_guid = res["line_id"]
                         self.password = res["password"]
@@ -154,105 +156,146 @@ class Directory(models.Model):
         return notification
 
     def action_set_transfer_kerio(self):
-        if self.is_transfer and self.transfer_number == '':
+        """Действие запускает функцию для Обновления записи переадресации в kerio"""
+        res = self.set_transfer_kerio()
+        # res = self.update_transfer_api(self.regname, True, '106')
+        if res == True:
+            notification = {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': ('Успех'),
+                    'message': 'Запись обновлена',
+                    'type':'success',  #types: success,warning,danger,info
+                    'sticky': False,  #True/False will display for few seconds if false
+                },
+            }
+        else:
+            if "error" in res:
+                error = res["error"]
+            else:
+                error = "Неизвестная ошибка"
             notification = {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': ('Ошибка'),
-                    'message': 'Не установлен номер для переадресации',
+                    'message': error,
                     'type':'warning',  #types: success,warning,danger,info
                     'sticky': True,  #True/False will display for few seconds if false
                 },
             }
-            return notification
+        
+        return notification
 
-        print("++++++++++++ action_set_transfer_kerio ++++++++++++++++++")
+
+    def set_transfer_kerio(self):
+        """Обновляет запись переадресации в kerio"""
+        print("++++++++++++ set_transfer_kerio ++++++++++++++++++")
+
+        print("self.is_transfer", self.is_transfer)
+        print("self.transfer_number", self.transfer_number)
+        if not self.is_kerio:
+            return {"error": "Не зарегистрирован в Kerio"}
+        if self.is_transfer == True and self.transfer_number == False:
+            return {"error": "Не установлен номер для переадресации"}
+
         kerio_url = self.env['ir.config_parameter'].sudo().get_param('kerio_url')
         kerio_user = self.env['ir.config_parameter'].sudo().get_param('kerio_user')
         kerio_password = self.env['ir.config_parameter'].sudo().get_param('kerio_password')
         print('kerio_user', kerio_user)
         error = ""
-        if self.username and self.regname and self.number and kerio_url and kerio_user and kerio_password:
+        if self.kerio_user_guid and self.kerio_group_guid and self.number and kerio_url and kerio_user and kerio_password:
 
             kerio = kerio_api.KerioAPI(kerio_url, kerio_user, kerio_password)
             if kerio.session:
                 print("kerio.session", kerio.session)
-                res = kerio.update_transfer(str(self.number), self.regname, self.username, self.is_transfer, self.transfer_number)
-
-                notification = {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': ('Успех'),
-                        'message': 'Запись обновлена',
-                        'type':'success',  #types: success,warning,danger,info
-                        'sticky': False,  #True/False will display for few seconds if false
-                    },
-                }
-                return notification
-                
+                res = kerio.update_transfer(    user_id = self.kerio_user_guid,
+                                                group_id = self.kerio_group_guid,
+                                                number = self.number,
+                                                is_transfer = self.is_transfer,
+                                                transfer_number = self.transfer_number
+                )
+                if res == True:
+                    print("Запись переадресации Успех")
+                    return True
+                else:
+                    print("Запись переадресации ОШИБКА")
+                    return {"error": res}
+                                
             else:
                 error = "Не возможно подключиться к Kerio Operator"
         else:
-            error = "Не установлены обязательные параметры: username, regname, number, kerio_url, kerio_user, kerio_password"
-        notification = {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': ('Ошибка'),
-                'message': 'Запись не добавлена. %s' % error,
-                'type':'warning',  #types: success,warning,danger,info
-                'sticky': True,  #True/False will display for few seconds if false
-            },
-        }
-        return notification
+            error = "Не установлены обязательные параметры: kerio_user_guid, kerio_group_guid, number, kerio_url, kerio_user, kerio_password"
+        return {"error": error}
+    
+    @api.model
+    def update_transfer_api(self, regname=False, is_transfer=False, transfer_number=False):
+        """ 
+            Внешнее дейсвие для обновления записи переадрессации 
+        """
+        print("++++++++++++++  update_transfer_api  ++++++++++++++++ ")
+        if not regname or (is_transfer == True and transfer_number == False):
+            return False
+        
+        search_dir = self.env['fs.directory'].sudo().search([('regname', '=', regname)], limit=1)
+        print("search_dir", search_dir)
+        if len(search_dir)>0:
+            search_dir.is_transfer = is_transfer
+            search_dir.transfer_number = transfer_number
+            res = search_dir.set_transfer_kerio()
+            if res:
+                return True
+            else: 
+                return False
+
+        return False
 
 
-class DirectoryController(http.Controller):
-    @http.route('/apidirectory', auth='public')
-    def handler(self):
-        dir_rec = request.env['fs.directory'].sudo().search([])
-        print("+++++++dir_rec",dir_rec)
-        spisok = []
-        for rec in dir_rec:
-            print("++++rec", rec)
-            vals = {
-                'id': rec.id,
-                'regname': rec.regname,
-                'password': rec.password,
-                'username': rec.username,
-            }
-            print("+++val", vals)
-            spisok.append(vals)
-        print("++++spisok", spisok)
+# class DirectoryController(http.Controller):
+#     @http.route('/apidirectory', auth='public')
+#     def handler(self):
+#         dir_rec = request.env['fs.directory'].sudo().search([])
+#         print("+++++++dir_rec",dir_rec)
+#         spisok = []
+#         for rec in dir_rec:
+#             print("++++rec", rec)
+#             vals = {
+#                 'id': rec.id,
+#                 'regname': rec.regname,
+#                 'password': rec.password,
+#                 'username': rec.username,
+#             }
+#             print("+++val", vals)
+#             spisok.append(vals)
+#         print("++++spisok", spisok)
 
-        data = {'status': 200, 'response': spisok, 'message': 'spisok returned'}
-        print("++++data", data)
+#         data = {'status': 200, 'response': spisok, 'message': 'spisok returned'}
+#         print("++++data", data)
 
-        return json.dumps(data)
+#         return json.dumps(data)
 
-class DirectoryController(http.Controller):
-    @http.route('/api_get_directory/<username>', type='http', auth='user')
-    def api_get_directory(self, username=False):
-        if not username:
-            data = {'status': 200, 'response': [], 'message': 'Not user name'}
-            return json.dumps(data)
-        else:
-            domain = [('username', '=', username), ('active', '=', True)]
+# class DirectoryController(http.Controller):
+#     @http.route('/api_get_directory/<username>', type='http', auth='user')
+#     def api_get_directory(self, username=False):
+#         if not username:
+#             data = {'status': 200, 'response': [], 'message': 'Not user name'}
+#             return json.dumps(data)
+#         else:
+#             domain = [('username', '=', username), ('active', '=', True)]
 
 
-        dir_rec = request.env['fs.directory'].sudo().search(domain, limit=1)
-        if len(dir_rec) > 0:
-            print("+++++++dir_rec",dir_rec)
-            vals = {
-                'id': dir_rec.id,
-                'regname': dir_rec.regname,
-                'password': dir_rec.password,
-                'username': dir_rec.username,
-            }
+#         dir_rec = request.env['fs.directory'].sudo().search(domain, limit=1)
+#         if len(dir_rec) > 0:
+#             print("+++++++dir_rec",dir_rec)
+#             vals = {
+#                 'id': dir_rec.id,
+#                 'regname': dir_rec.regname,
+#                 'password': dir_rec.password,
+#                 'username': dir_rec.username,
+#             }
 
-        data = {'status': 200, 'response': vals, 'message': 'vals returned'}
-        print("++++vals", vals)
+#         data = {'status': 200, 'response': vals, 'message': 'vals returned'}
+#         print("++++vals", vals)
 
-        return json.dumps(data)
+#         return json.dumps(data)
