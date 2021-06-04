@@ -192,9 +192,6 @@ class Directory(models.Model):
     def set_transfer_kerio(self):
         """Обновляет запись переадресации в kerio"""
         print("++++++++++++ set_transfer_kerio ++++++++++++++++++")
-
-        print("self.is_transfer", self.is_transfer)
-        print("self.transfer_number", self.transfer_number)
         if not self.is_kerio:
             return {"error": "Не зарегистрирован в Kerio"}
         if self.is_transfer == True and self.transfer_number == False:
@@ -241,13 +238,24 @@ class Directory(models.Model):
         search_dir = self.env['fs.directory'].sudo().search([('regname', '=', regname)], limit=1)
         print("search_dir", search_dir)
         if len(search_dir)>0:
+            # Сохраняем старые значения переадресации
+            old_is_transfer = search_dir.is_transfer
+            old_transfer_number = search_dir.transfer_number
+
+            # Устанавливаем новые значения
             search_dir.is_transfer = is_transfer
             search_dir.transfer_number = transfer_number
+
             res = search_dir.set_transfer_kerio()
-            if res:
+            
+            if res == True:
                 return True
             else: 
-                return False
+                # Восстанавливаем старые значения, т.к обновление прошло не удачно
+                print("Ошибка при обновлении переадресации", res)
+                search_dir.is_transfer = old_is_transfer
+                search_dir.transfer_number = old_transfer_number
+                return res
 
         return False
 
