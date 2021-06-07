@@ -119,6 +119,40 @@
                     </div>
 
 
+                    <h2>FreeSWITCH подключение</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <div class="col-lg-12 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="fs_host"/>
+                                <div class="text-muted">
+                                    Host
+                                </div>
+                                <field name="fs_host"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="fs_port"/>
+                                <div class="text-muted">
+                                    Port
+                                </div>
+                                <field name="fs_port"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 o_setting_box" id="FSWeb">
+                            <div class="o_setting_right_pane" id="rc_url_settings">
+                                <label for="fs_password"/>
+                                <div class="text-muted">
+                                    Port
+                                </div>
+                                <field name="fs_password"/>
+                            </div>
+                        </div>
+
+                    </div>
+
+
                     <h2>Значения по умолчанию</h2>
                     <div class="row mt16 o_settings_container">
 

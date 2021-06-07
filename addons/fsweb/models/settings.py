@@ -26,6 +26,10 @@ class FsSettings(models.TransientModel):
     kerio_user = fields.Char(u'Пользователь kerio')
     kerio_password = fields.Char(u'Пароль kerio')
 
+    fs_host = fields.Char(u'FreeSwitch host')
+    fs_port = fields.Char(u'FreeSwitch port')
+    fs_password = fields.Char(u'FreeSwitch пароль')
+
     domain_id = fields.Many2one("fs.domain", string="Домен по умолчанию")
     context_id = fields.Many2one("fs.context", string="Контекст по умолчанию")
     
@@ -48,6 +52,10 @@ class FsSettings(models.TransientModel):
                 'kerio_url': conf.get_param('kerio_url'),
                 'kerio_user': conf.get_param('kerio_user'),
                 'kerio_password': conf.get_param('kerio_password'),
+
+                'fs_host': conf.get_param('fs_host'),
+                'fs_port': conf.get_param('fs_port'),
+                'fs_password': conf.get_param('fs_password'),
                 'domain_id': int(conf.get_param('domain_id')),
                 'context_id': int(conf.get_param('context_id')),
         })
@@ -70,6 +78,11 @@ class FsSettings(models.TransientModel):
         conf.set_param('kerio_url', str(self.kerio_url))
         conf.set_param('kerio_user', str(self.kerio_user))
         conf.set_param('kerio_password', str(self.kerio_password))
+
+        conf.set_param('fs_host', str(self.fs_host))
+        conf.set_param('fs_port', str(self.fs_port))
+        conf.set_param('fs_password', str(self.fs_password))
+
         conf.set_param('domain_id', int(self.domain_id))
         conf.set_param('context_id', int(self.context_id))
     #     """
