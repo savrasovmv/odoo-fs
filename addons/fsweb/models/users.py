@@ -31,9 +31,10 @@ class FsUsers(models.Model):
         LDAP_PORT = self.env['ir.config_parameter'].sudo().get_param('ldap_port')
         LDAP_USER = self.env['ir.config_parameter'].sudo().get_param('ldap_user')
         LDAP_PASS = self.env['ir.config_parameter'].sudo().get_param('ldap_password')
+        LDAP_SSL = self.env['ir.config_parameter'].sudo().get_param('ldap_ssl')
         ldap_search_base = self.env['ir.config_parameter'].sudo().get_param('ldap_search_base')
 
-        ldap_server = Server(host=LDAP_HOST, port=int(LDAP_PORT), use_ssl=True, get_info='ALL')
+        ldap_server = Server(host=LDAP_HOST, port=int(LDAP_PORT), use_ssl=LDAP_SSL, get_info='ALL')
         c = Connection(ldap_server, user=LDAP_USER, password=LDAP_PASS)
         c.bind()
         filter = '(&(objectClass=person)(sAMAccountName=' + self.username + '))'

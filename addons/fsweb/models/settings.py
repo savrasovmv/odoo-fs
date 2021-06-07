@@ -10,6 +10,7 @@ class FsSettings(models.TransientModel):
 
     ldap_host = fields.Char(u'LDAP host')
     ldap_port = fields.Char(u'Ldap port', default='636')
+    ldap_ssl = fields.Boolean(u'SSL?', default=True)
     ldap_user = fields.Char(u'Пользователь ldap', default='')
     ldap_password = fields.Char(u'Пароль ldap', default='')
     ldap_search_base = fields.Char(u'search_base', default='')
@@ -35,6 +36,7 @@ class FsSettings(models.TransientModel):
         res.update({
                 'ldap_host': conf.get_param('ldap_host'),
                 'ldap_port': conf.get_param('ldap_port'),
+                'ldap_ssl': conf.get_param('ldap_ssl'),
                 'ldap_user': conf.get_param('ldap_user'),
                 'ldap_password': conf.get_param('ldap_password'),
                 'ldap_search_base': conf.get_param('ldap_search_base'),
@@ -57,6 +59,7 @@ class FsSettings(models.TransientModel):
         conf = self.env['ir.config_parameter']
         conf.set_param('ldap_host', str(self.ldap_host))
         conf.set_param('ldap_port', str(self.ldap_port))
+        conf.set_param('ldap_ssl', self.ldap_ssl)
         conf.set_param('ldap_user', str(self.ldap_user))
         conf.set_param('ldap_password', str(self.ldap_password))
         conf.set_param('ldap_search_base', str(self.ldap_search_base))
