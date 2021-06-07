@@ -27,11 +27,17 @@ class FsUsers(models.Model):
 
     def action_update_from_ldap(self):
         #Подключение к серверу AD
-        ldap_server = Server(host=LDAP_HOST, port=LDAP_PORT, use_ssl=True, get_info='ALL')
+        LDAP_HOST = self.env['ir.config_parameter'].sudo().get_param('ldap_host')
+        LDAP_PORT = self.env['ir.config_parameter'].sudo().get_param('ldap_port')
+        LDAP_USER = self.env['ir.config_parameter'].sudo().get_param('ldap_user')
+        LDAP_PASS = self.env['ir.config_parameter'].sudo().get_param('ldap_password')
+        ldap_search_base = self.env['ir.config_parameter'].sudo().get_param('ldap_search_base')
+
+        ldap_server = Server(host=LDAP_HOST, port=int(LDAP_PORT), use_ssl=True, get_info='ALL')
         c = Connection(ldap_server, user=LDAP_USER, password=LDAP_PASS)
         c.bind()
         filter = '(&(objectClass=person)(sAMAccountName=' + self.username + '))'
-        res = c.search(search_base='OU=UsersCorporate,DC=tmenergo,DC=ru',
+        res = c.search(search_base=ldap_search_base,
                     search_filter=filter,
                     search_scope=SUBTREE,
                     attributes=['cn','department', 'title', 'ou', 'ipPhone', 'distinguishedName' ])

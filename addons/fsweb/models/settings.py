@@ -8,6 +8,13 @@ class FsSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
 
+    ldap_host = fields.Char(u'LDAP host')
+    ldap_port = fields.Char(u'Ldap port', default='636')
+    ldap_user = fields.Char(u'Пользователь ldap', default='')
+    ldap_password = fields.Char(u'Пароль ldap', default='')
+    ldap_search_base = fields.Char(u'search_base', default='')
+
+
     rc_url = fields.Char(u'URL Rochet Chat')
     rc_prefix = fields.Char(u'Префикс рег. номера Rochet Chat', default='rc')
     rc_user = fields.Char(u'Пользователь Rochet Chat', default='')
@@ -26,6 +33,12 @@ class FsSettings(models.TransientModel):
         res = super(FsSettings, self).get_values()
         conf = self.env['ir.config_parameter']
         res.update({
+                'ldap_host': conf.get_param('ldap_host'),
+                'ldap_port': conf.get_param('ldap_port'),
+                'ldap_user': conf.get_param('ldap_user'),
+                'ldap_password': conf.get_param('ldap_password'),
+                'ldap_search_base': conf.get_param('ldap_search_base'),
+
                 'rc_url': conf.get_param('rc_url'),
                 'rc_prefix': conf.get_param('rc_prefix'),
                 'rc_user': conf.get_param('rc_user'),
@@ -42,6 +55,11 @@ class FsSettings(models.TransientModel):
     def set_values(self):
         super(FsSettings, self).set_values()
         conf = self.env['ir.config_parameter']
+        conf.set_param('ldap_host', str(self.ldap_host))
+        conf.set_param('ldap_port', str(self.ldap_port))
+        conf.set_param('ldap_user', str(self.ldap_user))
+        conf.set_param('ldap_password', str(self.ldap_password))
+        conf.set_param('ldap_search_base', str(self.ldap_search_base))
         conf.set_param('rc_url', str(self.rc_url))
         conf.set_param('rc_prefix', str(self.rc_prefix))
         conf.set_param('rc_user', str(self.rc_user))
