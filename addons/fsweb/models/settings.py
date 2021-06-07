@@ -26,9 +26,9 @@ class FsSettings(models.TransientModel):
     kerio_user = fields.Char(u'Пользователь kerio')
     kerio_password = fields.Char(u'Пароль kerio')
 
-    fs_host = fields.Char(u'FreeSwitch host')
-    fs_port = fields.Char(u'FreeSwitch port')
-    fs_password = fields.Char(u'FreeSwitch пароль')
+    fs_host = fields.Char(u'FreeSwitch host', default='localhost')
+    fs_port = fields.Char(u'FreeSwitch port', default='8021')
+    fs_password = fields.Char(u'FreeSwitch пароль', default='ClueCon')
 
     domain_id = fields.Many2one("fs.domain", string="Домен по умолчанию")
     context_id = fields.Many2one("fs.context", string="Контекст по умолчанию")

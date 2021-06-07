@@ -144,7 +144,7 @@
                             <div class="o_setting_right_pane" id="rc_url_settings">
                                 <label for="fs_password"/>
                                 <div class="text-muted">
-                                    Port
+                                    Пароль
                                 </div>
                                 <field name="fs_password"/>
                             </div>
