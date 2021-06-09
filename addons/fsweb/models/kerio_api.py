@@ -299,7 +299,7 @@ class KerioAPI(object):
             return line
         if "username" in line:
             # Проверка имени пользователя
-            if line["username"] == username:
+            if line["username"].lower() == username.lower():
 
                 # Если регистрация существует
                 if "sip_username" in line:
