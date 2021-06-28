@@ -3,3 +3,4 @@ access_fs_directory,access_fs_directory,model_fs_directory,base.group_user,1,1,1
 access_fs_users,access_fs_users,model_fs_users,base.group_user,1,1,1,1
 access_fs_context,access_fs_context,model_fs_context,base.group_user,1,1,1,1
 access_fs_domain,access_fs_domain,model_fs_domain,base.group_user,1,1,1,1
+access_fs_call_history,access_fs_call_history,model_fs_call_history,base.group_user,1,1,1,1

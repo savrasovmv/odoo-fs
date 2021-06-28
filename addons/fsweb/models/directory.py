@@ -80,22 +80,7 @@ class Directory(models.Model):
     
     def action_update_fs(self):
         print("++++++++++++ action_update_account ++++++++++++++++++")
-        # file_name = "/home/user/temp/%s.xml" % self.regname
-        # f= open(file_name, "w+")
-        # f.write("""
-        #     <include>
-        #         <gateway name="110rc">
-        #             <param name="username" value="110rc"/>
-        #             <param name="password" value="Gfhjkm12@"/>
-        #             <param name="proxy" value="192.168.1.11"/>
-        #             <param name="register" value="true"/>
-        #         </gateway>
-        #     </include>
         
-        # """)
-        # f.close() 
-        # subprocess.run(["scp", file_name, "root@192.168.1.8:/etc/freeswitch/sip_profiles/external/"])
-        # con = ESL.ESLconnection("192.168.1.8", "8021", "ClueCon")
         fs_host = self.env['ir.config_parameter'].sudo().get_param('fs_host')
         fs_port = self.env['ir.config_parameter'].sudo().get_param('fs_port')
         fs_password = self.env['ir.config_parameter'].sudo().get_param('fs_password')
@@ -263,50 +248,3 @@ class Directory(models.Model):
         return False
 
 
-# class DirectoryController(http.Controller):
-#     @http.route('/apidirectory', auth='public')
-#     def handler(self):
-#         dir_rec = request.env['fs.directory'].sudo().search([])
-#         print("+++++++dir_rec",dir_rec)
-#         spisok = []
-#         for rec in dir_rec:
-#             print("++++rec", rec)
-#             vals = {
-#                 'id': rec.id,
-#                 'regname': rec.regname,
-#                 'password': rec.password,
-#                 'username': rec.username,
-#             }
-#             print("+++val", vals)
-#             spisok.append(vals)
-#         print("++++spisok", spisok)
-
-#         data = {'status': 200, 'response': spisok, 'message': 'spisok returned'}
-#         print("++++data", data)
-
-#         return json.dumps(data)
-
-# class DirectoryController(http.Controller):
-#     @http.route('/api_get_directory/<username>', type='http', auth='user')
-#     def api_get_directory(self, username=False):
-#         if not username:
-#             data = {'status': 200, 'response': [], 'message': 'Not user name'}
-#             return json.dumps(data)
-#         else:
-#             domain = [('username', '=', username), ('active', '=', True)]
-
-
-#         dir_rec = request.env['fs.directory'].sudo().search(domain, limit=1)
-#         if len(dir_rec) > 0:
-#             print("+++++++dir_rec",dir_rec)
-#             vals = {
-#                 'id': dir_rec.id,
-#                 'regname': dir_rec.regname,
-#                 'password': dir_rec.password,
-#                 'username': dir_rec.username,
-#             }
-
-#         data = {'status': 200, 'response': vals, 'message': 'vals returned'}
-#         print("++++vals", vals)
-
-#         return json.dumps(data)

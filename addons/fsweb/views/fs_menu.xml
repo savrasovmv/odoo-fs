@@ -7,6 +7,9 @@
             <menuitem id="fs_users_menu_action" action="fs_users_action"/>
             <menuitem id="fs_directory_menu_action" action="fs_directory_action"/>
         </menuitem>
+        <menuitem id="fs_report_first_level_menu" name="Отчеты">
+            <menuitem id="fs_call_history_menu_action" action="fs_call_history_action"/>
+        </menuitem>
         <menuitem id="fs_settings_first_level_menu" name="Настройки">
             <menuitem id="fs_domain_menu_action" action="fs_domain_action"/>
             <menuitem id="fs_context_menu_action" action="fs_context_action"/>
