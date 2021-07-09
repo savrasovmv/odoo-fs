@@ -4,12 +4,6 @@ from odoo import fields, models
 from ldap3 import Server, Connection, SUBTREE, MODIFY_REPLACE, LEVEL
 import json
 
-#Подключение к ldap
-LDAP_HOST = '10.100.100.5'
-LDAP_PORT = 636
-LDAP_USER = "LDAP@tmenergo.ru"
-LDAP_PASS = 'TfFn7MfTlL'
-LDAP_USERNAME = "LDAP"  #Для проверки поиска в AD
 
 class FsUsers(models.Model):
     _name = "fs.users"
